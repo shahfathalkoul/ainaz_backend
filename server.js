@@ -5,6 +5,7 @@ const mysql = require('mysql2');
 require('dotenv').config();
 const bcrypt = require('bcrypt');
 const emailValidator = require('email-validator');
+app.use(cors());
 
 // Middleware to handle JSON data and CORS for the frontend
 app.use(express.json());
@@ -23,7 +24,7 @@ defaultdb.connect((err) => {
   }
   console.log('Connected to MySQL server.');
 });
-app.use(cors());
+
 app.get('/', (req, res) => {
   res.send('Welcome to the e-commerce API!');
 })
