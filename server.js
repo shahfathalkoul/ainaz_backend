@@ -24,6 +24,9 @@ defaultdb.connect((err) => {
   console.log('Connected to MySQL server.');
 });
 app.use(cors());
+app.get('/', (req, res) => {
+  res.send('Welcome to the e-commerce API!');
+})
 app.get('/create-cart-table', (req, res) => {
   const sql = `
   CREATE TABLE cart (
