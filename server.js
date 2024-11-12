@@ -10,13 +10,13 @@ app.use(cors());
 app.use(express.json()); // Middleware to handle JSON data and CORS for the frontend
 
 // MySQL connection setup
-console.log(process.env.DB_HOST)
+// console.log(process.env.DB_HOST)
 const defaultdb = mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  port: process.env.PORT
+  port: process.env.DB_PORT
 });
 
 defaultdb.connect((err) => {
