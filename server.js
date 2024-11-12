@@ -10,6 +10,7 @@ app.use(cors());
 app.use(express.json()); // Middleware to handle JSON data and CORS for the frontend
 
 // MySQL connection setup
+console.log(process.env.DB_HOST)
 const defaultdb = mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -20,7 +21,8 @@ const defaultdb = mysql.createConnection({
 
 defaultdb.connect((err) => {
   if (err) {
-    console.error('Error connecting to MySQL:', err.message);
+    console.log(err)
+    console.error('Error connecting to MySQL:', err.stack);
     return;
   }
   console.log('Connected to MySQL server.');
@@ -248,7 +250,7 @@ app.post('/api/cart', (req, res) => {
 });
 
 // Start the server
-const PORT = process.env.PORT || 5001;
+const PORT = 5001;
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
