@@ -133,6 +133,86 @@ app.get('/api/cart', (req, res) => {
     res.json(results);
   });
 });
+app.delete('/api/cart/:id', (req, res) => {
+  const itemId = req.params.id;
+  const deleteQuery = 'DELETE FROM cart WHERE id = ?';
+
+  defaultdb.query(deleteQuery, [itemId], (err, result) => {
+    if (err) {
+      return res.status(500).json({ message: 'Error deleting item from cart' });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Item not found' });
+    }
+    res.json({ message: 'Item removed successfully' });
+  });
+});
+// Route to handle checkout and clear the cart
+app.post('/api/checkout', (req, res) => {
+  // Fetch cart items and calculate total
+  const fetchCartQuery = 'SELECT * FROM cart';
+  const clearCartQuery = 'DELETE FROM cart';
+
+  defaultdb.query(fetchCartQuery, (err, cartItems) => {
+    if (err) {
+      return res.status(500).json({ message: 'Error fetching cart items for checkout' });
+    }
+
+    const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+    // Clear the cart
+    defaultdb.query(clearCartQuery, (err) => {
+      if (err) {
+        return res.status(500).json({ message: 'Error clearing the cart after checkout' });
+      }
+
+      res.json({
+        message: 'Checkout completed successfully. Cart is now empty.',
+        cartItems,
+        total,
+      });
+    });
+  });
+});
+// Route to update cart item quantity
+app.put('/api/cart/update-quantity', (req, res) => {
+  const { id, action } = req.body;
+
+  if (typeof id !== 'number' || !['increment', 'decrement'].includes(action)) {
+    return res.status(400).json({ message: 'Invalid request parameters' });
+  }
+
+  // Query to fetch the cart item
+  const fetchCartItemQuery = 'SELECT * FROM cart WHERE id = ?';
+  defaultdb.query(fetchCartItemQuery, [id], (err, result) => {
+    if (err) {
+      return res.status(500).json({ message: 'Error fetching cart item' });
+    }
+    if (result.length === 0) {
+      return res.status(404).json({ message: 'Cart item not found' });
+    }
+
+    const item = result[0];
+    let newQuantity = item.quantity;
+
+    // Increment or decrement the quantity based on the action
+    if (action === 'increment') {
+      newQuantity++;
+    } else if (action === 'decrement' && newQuantity > 1) {
+      newQuantity--;
+    }
+
+    // Query to update the cart item quantity
+    const updateQuantityQuery = 'UPDATE cart SET quantity = ? WHERE id = ?';
+    defaultdb.query(updateQuantityQuery, [newQuantity, id], (err, result) => {
+      if (err) {
+        return res.status(500).json({ message: 'Error updating cart item quantity' });
+      }
+      res.json({ message: 'Cart item quantity updated successfully', newQuantity });
+    });
+  });
+});
+
 
 // Route to add items to the cart
 app.post('/api/cart', (req, res) => {
